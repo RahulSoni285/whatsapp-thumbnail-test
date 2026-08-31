@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>og:image demo</title>
+
+<!-- ============================================================
+     These are the tags WhatsApp's crawler actually reads.
+     They must sit in <head>, and og:image must be an absolute
+     https:// URL once this page is hosted somewhere public.
+     ============================================================ -->
+<meta property="og:type"        content="website">
+<meta property="og:title"       content="How WhatsApp builds link-preview thumbnails">
+<meta property="og:description" content="WhatsApp's crawler reads Open Graph tags from a page's <head> and uses og:image as the preview thumbnail.">
+<meta property="og:url"         content="https://example.com/whatsapp-link-preview-demo/">
+<meta property="og:image"       content="https://example.com/whatsapp-link-preview-demo/og-image.jpg">
+<meta name="twitter:card"       content="summary_large_image">
+
+<style>
+  :root{
+    --ink:#0F2027; --ink-2:#1B3A3D; --panel:#152B2F;
+    --paper:#F2EDE4; --dim:#8FA3A3; --line:#26494C; --amber:#D8B26E;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--ink); color:var(--paper);
+    font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;
+    line-height:1.55;
+  }
+  main{max-width:760px; margin:0 auto; padding:64px 24px 96px}
+  h1{font-size:2rem; line-height:1.25; margin:0 0 8px}
+  p.lede{color:var(--dim); font-size:1.05rem; margin:0 0 40px}
+  h2{font-size:1.15rem; margin:48px 0 12px; color:var(--paper)}
+  p{color:#D7E0E0}
+  code, pre{font-family:"SFMono-Regular",Consolas,"DejaVu Sans Mono",monospace; font-size:.88rem}
+  code{background:var(--ink-2); padding:2px 6px; border-radius:4px; color:var(--amber)}
+  pre{
+    background:var(--ink-2); border:1px solid var(--line); border-radius:10px;
+    padding:20px; overflow-x:auto; color:#D7E0E0;
+  }
+  pre .tag{color:var(--amber)}
+  pre .attr{color:#8FBF9F}
+  pre .val{color:#D7E0E0}
+  ol{color:#D7E0E0; padding-left:1.2em}
+  li{margin-bottom:10px}
+
+  /* --- mock chat bubble showing the rendered preview --- */
+  .phone{
+    margin-top:16px; background:var(--ink-2); border:1px solid var(--line);
+    border-radius:14px; padding:24px; display:flex; justify-content:flex-end;
+  }
+  .bubble{
+    max-width:340px; background:#1F4B45; border-radius:12px 12px 2px 12px; overflow:hidden;
+  }
+  .bubble img{width:100%; display:block}
+  .bubble .meta{padding:10px 12px 12px}
+  .bubble .site{font-size:.72rem; letter-spacing:.02em; color:#9FD8C6; margin:0 0 3px}
+  .bubble .title{font-size:.92rem; font-weight:600; color:var(--paper); margin:0 0 3px}
+  .bubble .desc{font-size:.8rem; color:#B9CFCB; margin:0}
+  .bubble .text{padding:0 12px 12px; font-size:.88rem; color:var(--paper)}
+  figcaption{font-size:.8rem; color:var(--dim); margin-top:10px; text-align:right}
+</style>
+</head>
+<body>
+<main>
+  <h1>How WhatsApp turns a link into a thumbnail</h1>
+  <p class="lede">When you paste a URL into a chat, WhatsApp fetches that page and reads a few
+  meta tags from its &lt;head&gt; — this page carries the actual example.</p>
+
+  <h2>1. It fetches your page</h2>
+  <p>As soon as the link is pasted, WhatsApp's crawler makes a plain HTTP GET request to the
+  URL — no login, no JavaScript execution, just the raw HTML.</p>
+
+  <h2>2. It reads the Open Graph tags in &lt;head&gt;</h2>
+  <p>These are the exact tags in this page's &lt;head&gt;:</p>
+  <pre><span class="tag">&lt;meta</span> <span class="attr">property=</span><span class="val">"og:title"</span>       <span class="attr">content=</span><span class="val">"How WhatsApp builds link-preview thumbnails"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;meta</span> <span class="attr">property=</span><span class="val">"og:description"</span> <span class="attr">content=</span><span class="val">"WhatsApp's crawler reads Open Graph tags..."</span><span class="tag">&gt;</span>
+<span class="tag">&lt;meta</span> <span class="attr">property=</span><span class="val">"og:image"</span>       <span class="attr">content=</span><span class="val">"https://example.com/.../og-image.jpg"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;meta</span> <span class="attr">property=</span><span class="val">"og:url"</span>         <span class="attr">content=</span><span class="val">"https://example.com/..."</span><span class="tag">&gt;</span></pre>
+
+  <h2>3. og:image becomes the thumbnail</h2>
+  <p>The image that <code>og:image</code> points to is downloaded and shown as-is — WhatsApp
+  doesn't crop it into an OG image, it just displays what's already there. This is the actual
+  file this page references:</p>
+  <img src="og-image.jpg" alt="Demo og:image thumbnail" style="width:100%; max-width:480px; border-radius:10px; border:1px solid var(--line); display:block; margin:16px 0;">
+
+  <h2>What the crawler needs to actually pick it up</h2>
+  <ol>
+    <li><code>og:image</code> must be an <strong>absolute</strong> <code>https://</code> URL, reachable without login</li>
+    <li>Under roughly <strong>600&nbsp;KB</strong>, ideally 100–300&nbsp;KB</li>
+    <li>At least ~300px wide, aspect ratio no more extreme than 4:1 (landscape 1200×630 is the safe default)</li>
+    <li>JPG, PNG, or WebP — not SVG or GIF</li>
+    <li>The &lt;head&gt; with these tags must appear within the page's first 300&nbsp;KB of HTML</li>
+  </ol>
+
+  <h2>Rendered preview (mock-up)</h2>
+  <figure>
+    <div class="phone">
+      <div class="bubble">
+        <img src="og-image.jpg" alt="">
+        <div class="meta">
+          <p class="site">example.com</p>
+          <p class="title">How WhatsApp builds link-preview thumbnails</p>
+          <p class="desc">WhatsApp's crawler reads Open Graph tags from a page's head...</p>
+        </div>
+      </div>
+    </div>
+    <figcaption>A mock-up of how the chat bubble would look — not a live WhatsApp render</figcaption>
+  </figure>
+
+  <h2>Why previews sometimes don't show up</h2>
+  <p>WhatsApp caches whatever it fetched the first time, sometimes for days, and there's no
+  official way to force a refresh — changing the URL slightly (e.g. adding <code>?v=2</code>)
+  is the usual workaround. If <code>og:image</code> is missing, it falls back to a text-only
+  preview using the page's <code>&lt;title&gt;</code>; it does not scan the page for a random
+  image to use instead.</p>
+</main>
+</body>
+</html>
